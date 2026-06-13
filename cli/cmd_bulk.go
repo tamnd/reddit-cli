@@ -52,6 +52,9 @@ func (a *App) seedCmd() *cobra.Command {
 			for _, sub := range args {
 				posts, perr := a.client.Posts(ctx, sub, a.listingParams(sort, window), a.walkPages())
 				if perr != nil {
+					if len(args) == 1 {
+						return mapFetchErr(perr)
+					}
 					a.progressf("seed %s: %v", sub, perr)
 					continue
 				}
