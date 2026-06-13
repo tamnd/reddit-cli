@@ -75,20 +75,20 @@ reddit users gallowboob -n 20
 to branch in a script before spending a request:
 
 ```bash
-reddit id t3_1abc23
-reddit id u/spez
-reddit id https://www.reddit.com/r/golang/comments/1abc23/title/
+reddit id t3_1abc23 u/spez https://www.reddit.com/r/golang/comments/1abc23/title/
 ```
 
 ```
-link	1abc23
-account	spez
-link	1abc23
+INPUT                                                   KIND  ID
+t3_1abc23                                               post  1abc23
+u/spez                                                  user  spez
+https://www.reddit.com/r/golang/comments/1abc23/title/  post  1abc23
 ```
 
-The kinds follow Reddit's "thing" types: `comment`, `account`, `link` (a post),
-and `subreddit`. `open` resolves the same input to a URL and opens it in your
-browser:
+reddit maps Reddit's "thing" types to the names it prints: a link (`t3`) shows as
+`post`, an account (`t2`) as `user`, a comment (`t1`) as `comment`, and a
+subreddit (`t5`) as `subreddit`. `open` resolves the same input to a URL and
+opens it in your browser:
 
 ```bash
 reddit open 1abc23

@@ -81,7 +81,8 @@ reddit id https://www.reddit.com/r/golang/comments/1abc23/title/
 ```
 
 ```
-link	1abc23
+INPUT                                                   KIND  ID
+https://www.reddit.com/r/golang/comments/1abc23/title/  post  1abc23
 ```
 
 ## 6. Compose
