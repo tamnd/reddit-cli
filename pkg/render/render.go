@@ -115,13 +115,16 @@ func (r *Renderer) renderJSONL(items []any) error {
 
 func (r *Renderer) renderTemplate(items []any) error {
 	t, err := template.New("row").Funcs(template.FuncMap{
-		"join": func(sep string, ss []string) string { return strings.Join(ss, sep) },
+		"join": func(sep string, v any) string { return joinAny(sep, v) },
 	}).Parse(r.Template)
 	if err != nil {
 		return fmt.Errorf("parse --template: %w", err)
 	}
 	for _, it := range items {
-		if err := t.Execute(r.w, it); err != nil {
+		// Execute against the json-keyed view so a template reads the same
+		// lowercase keys (.title, .score) as --fields and the table header,
+		// rather than the Go struct field names.
+		if err := t.Execute(r.w, toAnyMap(it)); err != nil {
 			return err
 		}
 		_, _ = fmt.Fprintln(r.w)
@@ -208,6 +211,41 @@ func (r *Renderer) columns(items []any) []string {
 		return nil
 	}
 	return structJSONKeys(items[0])
+}
+
+// toAnyMap renders an item to its json-keyed view with values left in their
+// natural JSON types (string, number, bool, slice, object), so a template can
+// read .title as text and .score as a number and range over a slice field.
+func toAnyMap(v any) any {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return v
+	}
+	var m map[string]any
+	if err := json.Unmarshal(data, &m); err != nil {
+		// Not a json object (e.g. a bare scalar); hand the value through as-is.
+		return v
+	}
+	return m
+}
+
+// joinAny joins a slice value (as produced by toAnyMap, i.e. []any of strings)
+// with sep, so a template can write {{join "," .tags}}.
+func joinAny(sep string, v any) string {
+	switch vv := v.(type) {
+	case nil:
+		return ""
+	case []string:
+		return strings.Join(vv, sep)
+	case []any:
+		parts := make([]string, len(vv))
+		for i, e := range vv {
+			parts[i] = fmt.Sprintf("%v", e)
+		}
+		return strings.Join(parts, sep)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
 }
 
 func toMap(v any) map[string]string {

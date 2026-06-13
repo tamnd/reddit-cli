@@ -69,9 +69,19 @@ func TestURL(t *testing.T) {
 }
 
 func TestTemplate(t *testing.T) {
-	out := render(t, FormatTable, nil, false, "{{.ID}}={{.Score}}")
+	// A template reads the lowercase json keys, the same names --fields and the
+	// table header use, not the Go struct field names.
+	out := render(t, FormatTable, nil, false, "{{.id}}={{.score}}")
 	if out != "a1=10\nb2=3\n" {
 		t.Errorf("template output = %q", out)
+	}
+}
+
+func TestTemplateJoinSlice(t *testing.T) {
+	out := render(t, FormatTable, nil, false, `{{.id}}:{{join "," .tags}}`)
+	// First record has tags x,y; second has none.
+	if out != "a1:x,y\nb2:\n" {
+		t.Errorf("template join output = %q", out)
 	}
 }
 
