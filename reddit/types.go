@@ -11,41 +11,47 @@ import "time"
 
 // Post is a Reddit link (a t3 thing): a self post or an outbound link.
 type Post struct {
-	PostID           string    `json:"post_id"`
-	Fullname         string    `json:"fullname"`
-	Subreddit        string    `json:"subreddit"`
-	SubredditID      string    `json:"subreddit_id"`
-	Title            string    `json:"title"`
-	Author           string    `json:"author"`
-	AuthorFullname   string    `json:"author_fullname"`
-	Selftext         string    `json:"selftext"`
-	URL              string    `json:"url"`
-	Permalink        string    `json:"permalink"`
-	Domain           string    `json:"domain"`
-	IsSelf           bool      `json:"is_self"`
-	IsVideo          bool      `json:"is_video"`
-	Over18           bool      `json:"over_18"`
-	Spoiler          bool      `json:"spoiler"`
-	Stickied         bool      `json:"stickied"`
-	Locked           bool      `json:"locked"`
-	Score            int       `json:"score"`
-	UpvoteRatio      float64   `json:"upvote_ratio"`
-	Ups              int       `json:"ups"`
-	NumComments      int       `json:"num_comments"`
-	NumCrossposts    int       `json:"num_crossposts"`
-	CreatedUTC       time.Time `json:"created_utc"`
-	Edited           time.Time `json:"edited"`
-	Gilded           int       `json:"gilded"`
-	TotalAwards      int       `json:"total_awards"`
-	LinkFlairText    string    `json:"link_flair_text"`
-	AuthorFlairText  string    `json:"author_flair_text"`
-	PostHint         string    `json:"post_hint"`
-	Thumbnail        string    `json:"thumbnail"`
-	Distinguished    string    `json:"distinguished"`
-	RemovedCategory  string    `json:"removed_category"`
-	GalleryImageURLs []string  `json:"gallery_image_urls"`
-	CrosspostParent  string    `json:"crosspost_parent"`
-	FetchedAt        time.Time `json:"fetched_at"`
+	PostID               string    `json:"post_id"`
+	Fullname             string    `json:"fullname"`
+	Subreddit            string    `json:"subreddit"`
+	SubredditID          string    `json:"subreddit_id"`
+	Title                string    `json:"title"`
+	Author               string    `json:"author"`
+	AuthorFullname       string    `json:"author_fullname"`
+	Selftext             string    `json:"selftext"`
+	URL                  string    `json:"url"`
+	Permalink            string    `json:"permalink"`
+	Domain               string    `json:"domain"`
+	IsSelf               bool      `json:"is_self"`
+	IsVideo              bool      `json:"is_video"`
+	IsOriginalContent    bool      `json:"is_original_content"`
+	Over18               bool      `json:"over_18"`
+	Spoiler              bool      `json:"spoiler"`
+	Stickied             bool      `json:"stickied"`
+	Pinned               bool      `json:"pinned"`
+	Locked               bool      `json:"locked"`
+	Archived             bool      `json:"archived"`
+	Score                int       `json:"score"`
+	UpvoteRatio          float64   `json:"upvote_ratio"`
+	Ups                  int       `json:"ups"`
+	NumComments          int       `json:"num_comments"`
+	NumCrossposts        int       `json:"num_crossposts"`
+	SubredditSubscribers int64     `json:"subreddit_subscribers"`
+	CreatedUTC           time.Time `json:"created_utc"`
+	Edited               time.Time `json:"edited"`
+	Gilded               int       `json:"gilded"`
+	TotalAwards          int       `json:"total_awards"`
+	LinkFlairText        string    `json:"link_flair_text"`
+	AuthorFlairText      string    `json:"author_flair_text"`
+	PostHint             string    `json:"post_hint"`
+	Thumbnail            string    `json:"thumbnail"`
+	MediaURL             string    `json:"media_url"`
+	PreviewImageURL      string    `json:"preview_image_url"`
+	Distinguished        string    `json:"distinguished"`
+	RemovedCategory      string    `json:"removed_category"`
+	GalleryImageURLs     []string  `json:"gallery_image_urls"`
+	CrosspostParent      string    `json:"crosspost_parent"`
+	FetchedAt            time.Time `json:"fetched_at"`
 }
 
 // Comment is a Reddit comment (a t1 thing). One record per comment, with depth
@@ -67,7 +73,10 @@ type Comment struct {
 	Depth            int       `json:"depth"`
 	IsSubmitter      bool      `json:"is_submitter"`
 	Stickied         bool      `json:"stickied"`
+	ScoreHidden      bool      `json:"score_hidden"`
+	Collapsed        bool      `json:"collapsed"`
 	Distinguished    string    `json:"distinguished"`
+	AuthorFlairText  string    `json:"author_flair_text"`
 	Gilded           int       `json:"gilded"`
 	TotalAwards      int       `json:"total_awards"`
 	Permalink        string    `json:"permalink"`
@@ -88,6 +97,7 @@ type Subreddit struct {
 	CreatedUTC         time.Time `json:"created_utc"`
 	Over18             bool      `json:"over18"`
 	Quarantine         bool      `json:"quarantine"`
+	WikiEnabled        bool      `json:"wiki_enabled"`
 	SubredditType      string    `json:"subreddit_type"`
 	SubmissionType     string    `json:"submission_type"`
 	Lang               string    `json:"lang"`
@@ -117,6 +127,7 @@ type User struct {
 	AcceptFollowers      bool      `json:"accept_followers"`
 	IconImg              string    `json:"icon_img"`
 	SubredditTitle       string    `json:"subreddit_title"`
+	SubredditDescription string    `json:"subreddit_description"`
 	SubredditSubscribers int64     `json:"subreddit_subscribers"`
 	URL                  string    `json:"url"`
 	FetchedAt            time.Time `json:"fetched_at"`

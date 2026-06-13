@@ -71,7 +71,9 @@ a post, use [`comments`](/guides/comment-trees/).
 A post record carries the id and full name, the subreddit, the title and author,
 the score and upvote ratio, the comment count, the created and edited
 timestamps, the URL and permalink, the domain, the flair, and the
-self/over-18 flags. Narrow to what you need with `--fields`:
+self/over-18 flags. It also carries the media URL for a video post, the source
+URL of the first preview image, the gallery image URLs, and the
+archived/pinned/original-content flags. Narrow to what you need with `--fields`:
 
 ```bash
 reddit posts golang --sort top --fields title,score,num_comments,permalink

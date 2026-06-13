@@ -20,12 +20,18 @@ func TestParsePost(t *testing.T) {
 		"domain": "example.com",
 		"is_self": false,
 		"over_18": false,
+		"is_original_content": true,
+		"pinned": false,
+		"archived": true,
+		"subreddit_subscribers": 285000,
 		"score": 142,
 		"upvote_ratio": 0.97,
 		"num_comments": 23,
 		"created_utc": 1700000000,
 		"edited": false,
-		"link_flair_text": "news"
+		"link_flair_text": "news",
+		"media": {"reddit_video": {"fallback_url": "https://v.redd.it/abc/DASH_720.mp4"}},
+		"preview": {"images": [{"source": {"url": "https://preview.redd.it/abc.jpg?width=640"}}]}
 	}`
 	p, err := parsePost(json.RawMessage(data))
 	if err != nil {
@@ -45,6 +51,18 @@ func TestParsePost(t *testing.T) {
 	}
 	if p.CreatedUTC.IsZero() {
 		t.Error("created_utc should be set")
+	}
+	if !p.IsOriginalContent || !p.Archived || p.Pinned {
+		t.Errorf("oc/archived/pinned = %v/%v/%v", p.IsOriginalContent, p.Archived, p.Pinned)
+	}
+	if p.SubredditSubscribers != 285000 {
+		t.Errorf("subreddit_subscribers = %d", p.SubredditSubscribers)
+	}
+	if p.MediaURL != "https://v.redd.it/abc/DASH_720.mp4" {
+		t.Errorf("media_url = %q", p.MediaURL)
+	}
+	if p.PreviewImageURL != "https://preview.redd.it/abc.jpg?width=640" {
+		t.Errorf("preview_image_url = %q", p.PreviewImageURL)
 	}
 }
 
@@ -71,6 +89,9 @@ func TestParseComment(t *testing.T) {
 		"created_utc": 1700000100,
 		"edited": false,
 		"depth": 0,
+		"collapsed": true,
+		"score_hidden": false,
+		"author_flair_text": "Gopher",
 		"replies": ""
 	}`
 	cm, replies, err := parseComment(json.RawMessage(data))
@@ -82,6 +103,9 @@ func TestParseComment(t *testing.T) {
 	}
 	if cm.Body != "nice post" || cm.Score != 9 {
 		t.Errorf("body/score = %q/%d", cm.Body, cm.Score)
+	}
+	if !cm.Collapsed || cm.ScoreHidden || cm.AuthorFlairText != "Gopher" {
+		t.Errorf("collapsed/hidden/flair = %v/%v/%q", cm.Collapsed, cm.ScoreHidden, cm.AuthorFlairText)
 	}
 	// Reddit sends "" (an empty JSON string) for a comment with no replies;
 	// summarizing it must not panic and must report no replies.
@@ -99,6 +123,7 @@ func TestParseSubreddit(t *testing.T) {
 		"subscribers": 285000,
 		"created_utc": 1234567890,
 		"over18": false,
+		"wiki_enabled": true,
 		"subreddit_type": "public",
 		"url": "/r/golang/",
 		"icon_img": "https://b.thumbs.redditmedia.com/icon.png?width=256"
@@ -112,6 +137,9 @@ func TestParseSubreddit(t *testing.T) {
 	}
 	if s.Subscribers != 285000 {
 		t.Errorf("subscribers = %d", s.Subscribers)
+	}
+	if !s.WikiEnabled {
+		t.Errorf("wiki_enabled = %v", s.WikiEnabled)
 	}
 	if s.URL != BaseURL+"/r/golang/" {
 		t.Errorf("url not absolutized: %q", s.URL)
@@ -130,7 +158,8 @@ func TestParseUser(t *testing.T) {
 		"comment_karma": 3400,
 		"total_karma": 4600,
 		"is_gold": true,
-		"verified": true
+		"verified": true,
+		"subreddit": {"title": "gopher", "public_description": "Go all day.", "subscribers": 42}
 	}`
 	u, err := parseUser(json.RawMessage(data))
 	if err != nil {
@@ -141,6 +170,9 @@ func TestParseUser(t *testing.T) {
 	}
 	if u.TotalKarma != 4600 || !u.IsGold {
 		t.Errorf("karma/gold = %d/%v", u.TotalKarma, u.IsGold)
+	}
+	if u.SubredditDescription != "Go all day." || u.SubredditSubscribers != 42 {
+		t.Errorf("profile desc/subs = %q/%d", u.SubredditDescription, u.SubredditSubscribers)
 	}
 	if u.URL != BaseURL+"/user/gopher/" {
 		t.Errorf("url = %q", u.URL)

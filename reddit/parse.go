@@ -31,40 +31,56 @@ func editedTime(raw json.RawMessage) time.Time {
 
 // postData mirrors the fields reddit-cli reads off a t3 link.
 type postData struct {
-	ID              string          `json:"id"`
-	Name            string          `json:"name"`
-	Subreddit       string          `json:"subreddit"`
-	SubredditID     string          `json:"subreddit_id"`
-	Title           string          `json:"title"`
-	Author          string          `json:"author"`
-	AuthorFullname  string          `json:"author_fullname"`
-	Selftext        string          `json:"selftext"`
-	URL             string          `json:"url"`
-	Permalink       string          `json:"permalink"`
-	Domain          string          `json:"domain"`
-	IsSelf          bool            `json:"is_self"`
-	IsVideo         bool            `json:"is_video"`
-	Over18          bool            `json:"over_18"`
-	Spoiler         bool            `json:"spoiler"`
-	Stickied        bool            `json:"stickied"`
-	Locked          bool            `json:"locked"`
-	Score           int             `json:"score"`
-	UpvoteRatio     float64         `json:"upvote_ratio"`
-	Ups             int             `json:"ups"`
-	NumComments     int             `json:"num_comments"`
-	NumCrossposts   int             `json:"num_crossposts"`
-	CreatedUTC      float64         `json:"created_utc"`
-	Edited          json.RawMessage `json:"edited"`
-	Gilded          int             `json:"gilded"`
-	TotalAwards     int             `json:"total_awards_received"`
-	LinkFlairText   string          `json:"link_flair_text"`
-	AuthorFlairText string          `json:"author_flair_text"`
-	PostHint        string          `json:"post_hint"`
-	Thumbnail       string          `json:"thumbnail"`
-	Distinguished   string          `json:"distinguished"`
-	RemovedCategory string          `json:"removed_by_category"`
-	CrosspostParent string          `json:"crosspost_parent"`
-	MediaMetadata   map[string]struct {
+	ID                   string          `json:"id"`
+	Name                 string          `json:"name"`
+	Subreddit            string          `json:"subreddit"`
+	SubredditID          string          `json:"subreddit_id"`
+	Title                string          `json:"title"`
+	Author               string          `json:"author"`
+	AuthorFullname       string          `json:"author_fullname"`
+	Selftext             string          `json:"selftext"`
+	URL                  string          `json:"url"`
+	Permalink            string          `json:"permalink"`
+	Domain               string          `json:"domain"`
+	IsSelf               bool            `json:"is_self"`
+	IsVideo              bool            `json:"is_video"`
+	IsOriginalContent    bool            `json:"is_original_content"`
+	Over18               bool            `json:"over_18"`
+	Spoiler              bool            `json:"spoiler"`
+	Stickied             bool            `json:"stickied"`
+	Pinned               bool            `json:"pinned"`
+	Locked               bool            `json:"locked"`
+	Archived             bool            `json:"archived"`
+	Score                int             `json:"score"`
+	UpvoteRatio          float64         `json:"upvote_ratio"`
+	Ups                  int             `json:"ups"`
+	NumComments          int             `json:"num_comments"`
+	NumCrossposts        int             `json:"num_crossposts"`
+	SubredditSubscribers int64           `json:"subreddit_subscribers"`
+	CreatedUTC           float64         `json:"created_utc"`
+	Edited               json.RawMessage `json:"edited"`
+	Gilded               int             `json:"gilded"`
+	TotalAwards          int             `json:"total_awards_received"`
+	LinkFlairText        string          `json:"link_flair_text"`
+	AuthorFlairText      string          `json:"author_flair_text"`
+	PostHint             string          `json:"post_hint"`
+	Thumbnail            string          `json:"thumbnail"`
+	Distinguished        string          `json:"distinguished"`
+	RemovedCategory      string          `json:"removed_by_category"`
+	CrosspostParent      string          `json:"crosspost_parent"`
+	Media                struct {
+		RedditVideo struct {
+			FallbackURL string `json:"fallback_url"`
+		} `json:"reddit_video"`
+	} `json:"media"`
+	Preview struct {
+		Images []struct {
+			Source struct {
+				URL string `json:"url"`
+			} `json:"source"`
+		} `json:"images"`
+	} `json:"preview"`
+	MediaMetadata map[string]struct {
 		S struct {
 			U string `json:"u"`
 		} `json:"s"`
@@ -83,43 +99,58 @@ func parsePost(data json.RawMessage) (Post, error) {
 		return Post{}, err
 	}
 	p := Post{
-		PostID:           d.ID,
-		Fullname:         orFullname(d.Name, "t3", d.ID),
-		Subreddit:        d.Subreddit,
-		SubredditID:      d.SubredditID,
-		Title:            d.Title,
-		Author:           d.Author,
-		AuthorFullname:   d.AuthorFullname,
-		Selftext:         d.Selftext,
-		URL:              d.URL,
-		Permalink:        PermalinkURL(d.Permalink),
-		Domain:           d.Domain,
-		IsSelf:           d.IsSelf,
-		IsVideo:          d.IsVideo,
-		Over18:           d.Over18,
-		Spoiler:          d.Spoiler,
-		Stickied:         d.Stickied,
-		Locked:           d.Locked,
-		Score:            d.Score,
-		UpvoteRatio:      d.UpvoteRatio,
-		Ups:              d.Ups,
-		NumComments:      d.NumComments,
-		NumCrossposts:    d.NumCrossposts,
-		CreatedUTC:       epoch(d.CreatedUTC),
-		Edited:           editedTime(d.Edited),
-		Gilded:           d.Gilded,
-		TotalAwards:      d.TotalAwards,
-		LinkFlairText:    d.LinkFlairText,
-		AuthorFlairText:  d.AuthorFlairText,
-		PostHint:         d.PostHint,
-		Thumbnail:        d.Thumbnail,
-		Distinguished:    d.Distinguished,
-		RemovedCategory:  d.RemovedCategory,
-		CrosspostParent:  d.CrosspostParent,
-		GalleryImageURLs: galleryURLs(d),
-		FetchedAt:        time.Now().UTC(),
+		PostID:               d.ID,
+		Fullname:             orFullname(d.Name, "t3", d.ID),
+		Subreddit:            d.Subreddit,
+		SubredditID:          d.SubredditID,
+		Title:                d.Title,
+		Author:               d.Author,
+		AuthorFullname:       d.AuthorFullname,
+		Selftext:             d.Selftext,
+		URL:                  d.URL,
+		Permalink:            PermalinkURL(d.Permalink),
+		Domain:               d.Domain,
+		IsSelf:               d.IsSelf,
+		IsVideo:              d.IsVideo,
+		IsOriginalContent:    d.IsOriginalContent,
+		Over18:               d.Over18,
+		Spoiler:              d.Spoiler,
+		Stickied:             d.Stickied,
+		Pinned:               d.Pinned,
+		Locked:               d.Locked,
+		Archived:             d.Archived,
+		Score:                d.Score,
+		UpvoteRatio:          d.UpvoteRatio,
+		Ups:                  d.Ups,
+		NumComments:          d.NumComments,
+		NumCrossposts:        d.NumCrossposts,
+		SubredditSubscribers: d.SubredditSubscribers,
+		CreatedUTC:           epoch(d.CreatedUTC),
+		Edited:               editedTime(d.Edited),
+		Gilded:               d.Gilded,
+		TotalAwards:          d.TotalAwards,
+		LinkFlairText:        d.LinkFlairText,
+		AuthorFlairText:      d.AuthorFlairText,
+		PostHint:             d.PostHint,
+		Thumbnail:            d.Thumbnail,
+		MediaURL:             d.Media.RedditVideo.FallbackURL,
+		PreviewImageURL:      previewImageURL(d),
+		Distinguished:        d.Distinguished,
+		RemovedCategory:      d.RemovedCategory,
+		CrosspostParent:      d.CrosspostParent,
+		GalleryImageURLs:     galleryURLs(d),
+		FetchedAt:            time.Now().UTC(),
 	}
 	return p, nil
+}
+
+// previewImageURL returns the source URL of a post's first preview image, with
+// its HTML-escaped query left intact so the link resolves as Reddit serves it.
+func previewImageURL(d postData) string {
+	if len(d.Preview.Images) == 0 {
+		return ""
+	}
+	return d.Preview.Images[0].Source.URL
 }
 
 // galleryURLs resolves a gallery post's ordered image URLs from its metadata.
@@ -154,7 +185,10 @@ type commentData struct {
 	Depth            int             `json:"depth"`
 	IsSubmitter      bool            `json:"is_submitter"`
 	Stickied         bool            `json:"stickied"`
+	ScoreHidden      bool            `json:"score_hidden"`
+	Collapsed        bool            `json:"collapsed"`
 	Distinguished    string          `json:"distinguished"`
+	AuthorFlairText  string          `json:"author_flair_text"`
 	Gilded           int             `json:"gilded"`
 	TotalAwards      int             `json:"total_awards_received"`
 	Permalink        string          `json:"permalink"`
@@ -173,6 +207,7 @@ type subredditData struct {
 	CreatedUTC         float64 `json:"created_utc"`
 	Over18             bool    `json:"over18"`
 	Quarantine         bool    `json:"quarantine"`
+	WikiEnabled        bool    `json:"wiki_enabled"`
 	SubredditType      string  `json:"subreddit_type"`
 	SubmissionType     string  `json:"submission_type"`
 	Lang               string  `json:"lang"`
@@ -199,6 +234,7 @@ func parseSubreddit(data json.RawMessage) (Subreddit, error) {
 		CreatedUTC:         epoch(d.CreatedUTC),
 		Over18:             d.Over18,
 		Quarantine:         d.Quarantine,
+		WikiEnabled:        d.WikiEnabled,
 		SubredditType:      d.SubredditType,
 		SubmissionType:     d.SubmissionType,
 		Lang:               d.Lang,
@@ -229,8 +265,9 @@ type userData struct {
 	AcceptFollowers  bool    `json:"accept_followers"`
 	IconImg          string  `json:"icon_img"`
 	Subreddit        struct {
-		Title       string `json:"title"`
-		Subscribers int64  `json:"subscribers"`
+		Title             string `json:"title"`
+		PublicDescription string `json:"public_description"`
+		Subscribers       int64  `json:"subscribers"`
 	} `json:"subreddit"`
 }
 
@@ -256,6 +293,7 @@ func parseUser(data json.RawMessage) (User, error) {
 		AcceptFollowers:      d.AcceptFollowers,
 		IconImg:              stripQuery(d.IconImg),
 		SubredditTitle:       d.Subreddit.Title,
+		SubredditDescription: d.Subreddit.PublicDescription,
 		SubredditSubscribers: d.Subreddit.Subscribers,
 		URL:                  BaseURL + "/user/" + d.Name + "/",
 		FetchedAt:            time.Now().UTC(),
@@ -316,7 +354,10 @@ func parseComment(data json.RawMessage) (Comment, json.RawMessage, error) {
 		Depth:            d.Depth,
 		IsSubmitter:      d.IsSubmitter,
 		Stickied:         d.Stickied,
+		ScoreHidden:      d.ScoreHidden,
+		Collapsed:        d.Collapsed,
 		Distinguished:    d.Distinguished,
+		AuthorFlairText:  d.AuthorFlairText,
 		Gilded:           d.Gilded,
 		TotalAwards:      d.TotalAwards,
 		Permalink:        PermalinkURL(d.Permalink),
