@@ -1,0 +1,10 @@
+title       = "reddit"
+baseURL     = "https://reddit-cli.tamnd.com/"
+description = "A fast, friendly command line for public Reddit data. One binary that turns subreddit listings, posts, comment trees, user and subreddit profiles, search, rules, moderators, wiki pages, and duplicate discussions into rich structured records as table, JSON, JSONL, CSV, TSV, or URLs."
+contentDir  = "content"
+outputDir   = "public"
+theme       = "tago-doks"
+syntaxHighlight = "true"
+
+[params]
+github = "https://github.com/tamnd/reddit-cli"
